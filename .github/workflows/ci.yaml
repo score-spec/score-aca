@@ -12,6 +12,8 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - name: tidy go mod
+        run: go mod tidy
       - name: test
         run: go run gotest.tools/gotestsum@latest --format github-actions
       - name: lint
