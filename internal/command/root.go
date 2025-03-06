@@ -21,7 +21,7 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:           "score-implementation-sample",
+	Use:           "score-aca",
 	SilenceErrors: true,
 	CompletionOptions: cobra.CompletionOptions{
 		HiddenDefaultCmd: true,

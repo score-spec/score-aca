@@ -1,4 +1,4 @@
-module github.com/score-spec/score-implementation-sample
+module github.com/score-spec/score-aca
 
 go 1.24.0
 
