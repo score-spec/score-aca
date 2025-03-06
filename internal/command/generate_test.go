@@ -89,11 +89,11 @@ func TestInitAndGenerate_with_sample(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "", stdout)
 	stdout, _, err = executeAndResetCommand(context.Background(), rootCmd, []string{
-		"generate", "-o", "manifests.yaml", "--", "score.yaml",
+		"generate", "-o", "manifests.bicep", "--", "score.yaml",
 	})
 	require.NoError(t, err)
 	assert.Equal(t, "", stdout)
-	raw, err := os.ReadFile(filepath.Join(td, "manifests.yaml"))
+	raw, err := os.ReadFile(filepath.Join(td, "manifests.bicep"))
 	assert.NoError(t, err)
 	assert.Equal(t, `---
 apiVersion: score.dev/v1b1
