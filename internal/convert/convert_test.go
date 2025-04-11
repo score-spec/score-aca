@@ -696,10 +696,6 @@ func stringPtr(s string) *string {
 	return &s
 }
 
-func intPtr(i int) *int {
-	return &i
-}
-
 // Helper function to create bool pointers
 func boolPtr(b bool) *bool {
 	return &b
