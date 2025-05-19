@@ -582,6 +582,18 @@ func TestConvertContainerFiles(t *testing.T) {
 		t.Fatalf("Failed to create test file: %v", err)
 	}
 
+	// Create a relative test file in a subdirectory
+	relativeDir := filepath.Join(tmpDir, "subdir")
+	err = os.Mkdir(relativeDir, 0755)
+	if err != nil {
+		t.Fatalf("Failed to create subdirectory: %v", err)
+	}
+	relativeFilePath := filepath.Join("subdir", "relative-file.txt")
+	err = os.WriteFile(filepath.Join(tmpDir, relativeFilePath), []byte("relative content with ${TEST_VAR}"), 0644)
+	if err != nil {
+		t.Fatalf("Failed to create relative test file: %v", err)
+	}
+
 	// Create a simple substitution function for testing
 	sf := func(s string) (string, error) {
 		if s == "TEST_VAR" {
@@ -597,42 +609,75 @@ func TestConvertContainerFiles(t *testing.T) {
 
 	tests := []struct {
 		name      string
-		input     []scoretypes.ContainerFilesElem
+		input     map[string]scoretypes.ContainerFile
 		scoreFile *string
-		want      []scoretypes.ContainerFilesElem
+		want      map[string]scoretypes.ContainerFile
 		wantErr   bool
 	}{
 		{
 			name: "file with content",
-			input: []scoretypes.ContainerFilesElem{
-				{
-					Target:  "/app/config.txt",
+			input: map[string]scoretypes.ContainerFile{
+				"/app/config.txt": {
 					Content: stringPtr("content with ${TEST_VAR}"),
 				},
 			},
 			scoreFile: &scoreFile,
-			want: []scoretypes.ContainerFilesElem{
-				{
-					Target:   "/app/config.txt",
+			want: map[string]scoretypes.ContainerFile{
+				"/app/config.txt": {
 					Content:  stringPtr("content with test-value"),
+					Source:   nil,
 					NoExpand: boolPtr(true),
 				},
 			},
 			wantErr: false,
 		},
 		{
-			name: "file with source",
-			input: []scoretypes.ContainerFilesElem{
-				{
-					Target: "/app/config.txt",
+			name: "file with absolute source",
+			input: map[string]scoretypes.ContainerFile{
+				"/app/config.txt": {
 					Source: stringPtr(testFilePath),
 				},
 			},
 			scoreFile: &scoreFile,
-			want: []scoretypes.ContainerFilesElem{
-				{
-					Target:   "/app/config.txt",
+			want: map[string]scoretypes.ContainerFile{
+				"/app/config.txt": {
 					Content:  stringPtr("test content with test-value"),
+					Source:   nil,
+					NoExpand: boolPtr(true),
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "file with relative source",
+			input: map[string]scoretypes.ContainerFile{
+				"/app/config.txt": {
+					Source: stringPtr(relativeFilePath),
+				},
+			},
+			scoreFile: &scoreFile,
+			want: map[string]scoretypes.ContainerFile{
+				"/app/config.txt": {
+					Content:  stringPtr("relative content with test-value"),
+					Source:   nil,
+					NoExpand: boolPtr(true),
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "file with NoExpand",
+			input: map[string]scoretypes.ContainerFile{
+				"/app/config.txt": {
+					Content:  stringPtr("content with ${TEST_VAR}"),
+					NoExpand: boolPtr(true),
+				},
+			},
+			scoreFile: &scoreFile,
+			want: map[string]scoretypes.ContainerFile{
+				"/app/config.txt": {
+					Content:  stringPtr("content with ${TEST_VAR}"),
+					Source:   nil,
 					NoExpand: boolPtr(true),
 				},
 			},
@@ -640,9 +685,8 @@ func TestConvertContainerFiles(t *testing.T) {
 		},
 		{
 			name: "file with error in substitution",
-			input: []scoretypes.ContainerFilesElem{
-				{
-					Target:  "/app/config.txt",
+			input: map[string]scoretypes.ContainerFile{
+				"/app/config.txt": {
 					Content: stringPtr("content with ${ERROR_VAR}"),
 				},
 			},
@@ -651,11 +695,20 @@ func TestConvertContainerFiles(t *testing.T) {
 			wantErr:   true,
 		},
 		{
-			name: "file with no content or source",
-			input: []scoretypes.ContainerFilesElem{
-				{
-					Target: "/app/config.txt",
+			name: "file with nonexistent source",
+			input: map[string]scoretypes.ContainerFile{
+				"/app/config.txt": {
+					Source: stringPtr("/nonexistent/path.txt"),
 				},
+			},
+			scoreFile: &scoreFile,
+			want:      nil,
+			wantErr:   true,
+		},
+		{
+			name: "file with neither content nor source",
+			input: map[string]scoretypes.ContainerFile{
+				"/app/config.txt": {},
 			},
 			scoreFile: &scoreFile,
 			want:      nil,
@@ -671,21 +724,7 @@ func TestConvertContainerFiles(t *testing.T) {
 				return
 			}
 			if !tt.wantErr {
-				if len(got) != len(tt.want) {
-					t.Errorf("convertContainerFiles() got %v, want %v", got, tt.want)
-					return
-				}
-				for i, v := range tt.want {
-					if *got[i].Content != *v.Content {
-						t.Errorf("convertContainerFiles() got[%d].Content = %v, want %v", i, *got[i].Content, *v.Content)
-					}
-					if got[i].Target != v.Target {
-						t.Errorf("convertContainerFiles() got[%d].Target = %v, want %v", i, got[i].Target, v.Target)
-					}
-					if *got[i].NoExpand != *v.NoExpand {
-						t.Errorf("convertContainerFiles() got[%d].NoExpand = %v, want %v", i, *got[i].NoExpand, *v.NoExpand)
-					}
-				}
+				assert.Equal(t, tt.want, got, "convertContainerFiles() result doesn't match")
 			}
 		})
 	}
