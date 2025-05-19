@@ -1,4 +1,16 @@
-.score-implementation-sample/
-score.yaml
+# Ignore Mac system files
+.DS_Store
+
+# Ignore IDE specific files
 .idea/
-manifests.yaml
+.vscode/
+
+# Ignore .score-aca directory
+.score-aca/
+
+# Ignore temporary input and output files
+*.yaml
+*.bicep
+
+# Ignore shell helper scripts
+*.sh
