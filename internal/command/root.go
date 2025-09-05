@@ -18,6 +18,7 @@ import (
 	"log/slog"
 
 	"github.com/spf13/cobra"
+	"github.com/score-spec/score-aca/internal/version"
 )
 
 var rootCmd = &cobra.Command{
@@ -32,6 +33,10 @@ var rootCmd = &cobra.Command{
 		})))
 		return nil
 	},
+}
+
+func init() {
+	rootCmd.Version = version.BuildVersionString()
 }
 
 func Execute() error {
