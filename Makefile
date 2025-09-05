@@ -19,6 +19,7 @@ test:
 	go test ./... -cover -race
 
 test-app: build
+	./score-aca --version
 	./score-aca init
 	cat score.yaml
 	./score-aca generate score.yaml
@@ -28,6 +29,7 @@ build-container:
 	docker build -t score-aca:local .
 
 test-container: build-container
+	docker run --rm score-aca:local --version
 	docker run --rm -v .:/score-aca score-aca:local init
 	cat score.yaml
 	docker run --rm -v .:/score-aca score-aca:local generate score.yaml
