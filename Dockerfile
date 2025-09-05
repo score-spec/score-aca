@@ -1,0 +1,26 @@
+FROM golang:1.25.1-alpine@sha256:cb0b8e92b8b63b1ba16ce78d926fcba5d4f9ff241855115568006affc3ae6557 AS builder
+
+ARG VERSION
+
+# Set the current working directory inside the container.
+WORKDIR /go/src/github.com/score-spec/score-aca
+
+# Copy just the module bits
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy the entire project and build it.
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -o /usr/local/bin/score-aca ./cmd/score-aca
+
+# We can use gcr.io/distroless/static since we don't rely on any linux libs or state, but we need ca-certificates to connect to https/oci with the init command.
+FROM gcr.io/distroless/static:530158861eebdbbf149f7e7e67bfe45eb433a35c@sha256:5c7e2b465ac6a2a4e5f4f7f722ce43b147dabe87cb21ac6c4007ae5178a1fa58
+
+# Set the current working directory inside the container.
+WORKDIR /score-aca
+
+# Copy the binary from the builder image.
+COPY --from=builder /usr/local/bin/score-aca/usr/local/bin/score-aca
+
+# Run the binary.
+ENTRYPOINT ["/usr/local/bin/score-aca"]
