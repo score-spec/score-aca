@@ -1,6 +1,6 @@
 module github.com/score-spec/score-aca
 
-go 1.25
+go 1.25.1
 
 require (
 	github.com/imdario/mergo v1.0.1

@@ -1,6 +1,6 @@
 # score-aca
 
-`score-aca` is a Score implementation of the [Score specification](https://github.com/score-spec/spec) for [Azure Container Apps](https://azure.microsoft.com/products/container-apps).
+`score-aca` is a Score implementation of the [Score specification](https://github.com/score-spec/spec) for [Azure Container Apps (ACA)](https://azure.microsoft.com/products/container-apps).
 
 ## Demo
 
@@ -13,14 +13,14 @@ go run ./cmd/score-aca init
 ```yaml
 apiVersion: score.dev/v1b1
 containers:
-    main:
-        image: stefanprodan/podinfo
+  main:
+    image: stefanprodan/podinfo
 metadata:
-    name: example
+  name: example
 service:
-    ports:
-        web:
-            port: 8080
+  ports:
+    web:
+     port: 8080
 ```
 
 ### Generate Bicep file
@@ -97,7 +97,3 @@ az group create --name ${RESOURCE_GROUP} --location ${LOCATION}
 
 az deployment group create --resource-group "${RESOURCE_GROUP}" --template-file ./manifests.bicep
 ```
-
-## A note on licensing
-
-Most code files here retain the Apache licence header since they were copied or adapted from the reference `score-compose` which is Apache licensed. Any modifications to these files should retain the Apache licence and attribution.
