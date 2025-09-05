@@ -28,7 +28,6 @@ build-container:
 	docker build -t score-aca:local .
 
 test-container: build-container
-	docker run --rm score-aca:local --version
 	docker run --rm -v .:/score-aca score-aca:local init
 	cat score.yaml
 	docker run --rm -v .:/score-aca score-aca:local generate score.yaml

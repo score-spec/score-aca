@@ -20,7 +20,7 @@ FROM gcr.io/distroless/static:530158861eebdbbf149f7e7e67bfe45eb433a35c@sha256:5c
 WORKDIR /score-aca
 
 # Copy the binary from the builder image.
-COPY --from=builder /usr/local/bin/score-aca/usr/local/bin/score-aca
+COPY --from=builder /usr/local/bin/score-aca /usr/local/bin/score-aca
 
 # Run the binary.
 ENTRYPOINT ["/usr/local/bin/score-aca"]
