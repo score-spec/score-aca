@@ -11,13 +11,19 @@ help:
 .PHONY: .FORCE
 .FORCE:
 
+## Build the score-aca binary
+.PHONY: build
 build:
 	go build ./cmd/score-aca/
 
+## Run all tests with coverage and race detection
+.PHONY: test
 test:
 	go vet ./...
 	go test ./... -cover -race
 
+## Run the application locally
+.PHONY: test-app
 test-app: build
 	./score-aca --version
 	./score-aca init
@@ -25,9 +31,13 @@ test-app: build
 	./score-aca generate score.yaml
 	cat manifest.bicep
 
+## Build the Docker container for score-aca
+.PHONY: build-container
 build-container:
 	docker build -t score-aca:local .
 
+## Run tests inside the Docker container
+.PHONY: test-container
 test-container: build-container
 	docker run --rm score-aca:local --version
 	docker run --rm -v .:/score-aca score-aca:local init
